@@ -22,3 +22,30 @@ var socket = io();
 
 // Server agent master object
 var serverAgent = {};
+
+// Server agent initialize
+serverAgent.initialize = function () {
+
+  // Socket on server verify
+  socket.on('server:verify', function (data) {
+    // Create scene
+    main.createScene();
+    // Render scene
+    main.renderScene_start();
+  });
+};
+
+// Server agent verify
+serverAgent.verify = function () {
+  // Attempt to verify client
+  socket.emit('client:verify', {
+    'username': 'zach',
+    'password': 'zach'
+  });
+};
+
+// Initialize serverAgent
+serverAgent.initialize();
+
+// Verify the client
+serverAgent.verify();

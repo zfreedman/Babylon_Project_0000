@@ -38,7 +38,42 @@ io.on('connection', function (socket) {
   socket.on('disconnect', function () {
     logger.logConnection(socket.id, false);
   });
+
+  // On verify attempt
+  socket.on('client:verify', function (data) {
+    // Add socketID
+    data.socketID = socket.id;
+    // Handoff to helper
+    helper.verify(data);
+  });
 });
+
+//  _          _                 
+// | |        | |                
+// | |__   ___| |_ __   ___ _ __ 
+// | '_ \ / _ \ | '_ \ / _ \ '__|
+// | | | |  __/ | |_) |  __/ |   
+// |_| |_|\___|_| .__/ \___|_|   
+//              | |              
+//              |_|              
+
+// Helper master object
+var helper = {};
+
+// Helper verify
+helper.verify = function (data) {
+
+  // Get result
+  var result = {
+    'verified': true,
+    'username': 'zach',
+    'password': 'zach'
+  };
+
+  // Emit mock object
+  io.sockets.connected[data.socketID]
+    .emit('server:verify', result);
+};
 
  //  _                             
  // | |                            

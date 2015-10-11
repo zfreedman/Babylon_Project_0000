@@ -12,3 +12,15 @@
 
 // Input handler master object
 var inputs = {};
+
+// Document key press
+window.onkeydown = function (e) {
+  console.log(e.which);
+  // Set input to true
+  inputs[e.which] = 1;
+};
+
+// Document on key up
+window.onkeyup = function (e) {
+  delete inputs[e.which];
+};

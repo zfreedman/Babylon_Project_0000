@@ -3,8 +3,26 @@
 <head>
   <meta charset='utf-8'>
   <title>Babylon_Project_0000</title>
+
+  <!-- Master Style Sheet -->
+  <link rel='stylesheet' type='text/css'
+    href='css/index.css' />
+
+  <!-- HandJS (dependency for BabylonJS)-->
+  <script src='bower_components/handjs/hand.js'>
+  </script>
+  <!-- BabylonJS -->
+  <script src='bower_components/babylonjs/dist/babylon.2.2.js'>
+  </script>
+  <!-- jQuery -->
+  <script src='bower_components/jquery/dist/jquery.min.js'>
+  </script>
+
 </head>
 <body>
+
+  <!-- Render canvas for BabylonJS -->
+  <canvas id='renderCanvas'></canvas>
 
   <!-- SocketIO served from server -->
   <script src='/socket.io/socket.io.js'></script>
@@ -17,5 +35,11 @@
   
   <!-- Client gui -->
   <script src='/js/gui/gui.js'></script>
+
+  <!-- Client game -->
+  <!-- Main -->
+  <script src='/js/game/main.js'></script>
+  <!-- Inputs -->
+  <script src='/js/game/inputs.js'></script>
 </body>
 </html>
