@@ -76,8 +76,8 @@ main.makeEnvironment = function () {
   var floor = main.floor;
   // Scale
   floor.scaling.y = 2;
-  floor.scaling.x = 6;
-  floor.scaling.z = 6;
+  floor.scaling.x = 100;
+  floor.scaling.z = 100;
   floor.position.y -= floor.scaling.y/2;
   // Create floor material
   var floorMaterial = new BABYLON.StandardMaterial('floorMat',
@@ -90,7 +90,7 @@ main.makeEnvironment = function () {
   floor.checkCollisions = true;
 
   // Set gravity
-  main.gravity = -5;
+  main.gravity = -10;
 };
 
 // Main make player
@@ -99,7 +99,7 @@ main.makePlayer = function () {
   main.player = {};
   var player = main.player;
   // Set player speed
-  player.speed = 5;
+  player.speed = 10;
   // Set player jumpTime
   player.jumpTime = -1;
   // Set player jumpVelocity_Start
@@ -109,6 +109,8 @@ main.makePlayer = function () {
   // Set player jump count
   player.jumpCount = 2;
   player.jumpCount_Start = 2;
+  // Player completed flip bool
+  player.flipComplete = false;
   // Set player gravity multiplier
   player.gravMult = 1.0;
   // Get player max jump height time
@@ -250,6 +252,7 @@ main.movePlayer = function () {
       player.jumpTime = -1;
       player.jumpHeight_Start = -1;
       player.jumpCount = player.jumpCount_Start;
+      player.flipComplete = false;
     }
     // Move player vertically
     playerParent.position.y = y;
@@ -270,6 +273,22 @@ main.movePlayer = function () {
   if (y_r !== 0) {
     playerParent.rotation.y
       += (y_r * main.deltaTime * player.rotationSpeed);
+  }
+
+  // Flip player
+  var x_r = 0;
+  // If used both jumps
+  if (!player.flipComplete && player.jumpCount === 0) {
+    // Get flip ratio
+    var flipRatio = main.flipInterpretter();
+    // If ratio exceeds 1
+    if (1 < flipRatio) {
+      // Set flip ratio to 0
+      flipRatio = 0
+      // Complete flip
+      player.flipComplete = true;
+    }
+    playerChild.rotation.x = flipRatio * 2 * Math.PI;
   }
 };
 
@@ -305,6 +324,18 @@ main.jumpInterpretter = function () {
   // Return kinematics
   return jumpHeight_Start + jumpVelocity_Start * jumpTime
     + .5 * gravity * jumpTime * jumpTime;
+};
+
+// Main flip interpreter
+main.flipInterpretter = function () {
+  // Local player
+  var player = main.player;
+  // Time in jump
+  var jumpTime = player.jumpTime;
+  // Flip ratio
+  var flipRatio = .5 * jumpTime / player.maxJumpHeightTime;
+  // Return rotation
+  return flipRatio;
 };
 
 // On window resize
