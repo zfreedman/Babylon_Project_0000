@@ -24,10 +24,6 @@ main.createScene = function () {
   main.scene = new BABYLON.Scene(engine);
   var scene = main.scene;
 
-  // Change background color
-  // scene.clearColor = new BABYLON.Color3(0, 1, 0);
-
-
   // Make environment
   main.makeEnvironment();
 
@@ -75,8 +71,10 @@ main.makeEnvironment = function () {
   light.intensity = .5;
 
   // Create floor
-  var floor = BABYLON.Mesh.CreateBox('floor0',
+  main.floor = BABYLON.Mesh.CreateBox('floor0',
     1, scene);
+  var floor = main.floor;
+  // Scale
   floor.scaling.y = 2;
   floor.scaling.x = 6;
   floor.scaling.z = 6;
@@ -88,9 +86,11 @@ main.makeEnvironment = function () {
   floorMaterial.wireframe = true;
   // Set material of floor
   floor.material = floorMaterial;
+  // Check collisions on floor
+  floor.checkCollisions = true;
 
   // Set gravity
-  main.gravity = -15;
+  main.gravity = -5;
 };
 
 // Main make player
@@ -113,20 +113,34 @@ main.makePlayer = function () {
   player.gravMult = 1.0;
   // Get player max jump height time
   player.maxJumpHeightTime
-    = -player.jumpVelocity_Start/(main.gravity * main.player.gravMult);
+    = -player.jumpVelocity_Start/(main.gravity
+      * main.player.gravMult);
+
+  // Set player LR rotation speed
+  player.rotationSpeed = 2;
 
   // Get scene reference
   var scene = main.scene;
 
-  // Set player game object
-  var box = BABYLON.Mesh.CreateBox('client_local',
+  // Set player game object's parent
+  var boxParent = BABYLON.Mesh.CreateBox('playerParent',
     1.0, scene);
-  box.position.y = .5;
-  main.player.gameObject = box;
+  boxParent.position.y = .5;
+  main.player.gameObject_parent = boxParent;
+  main.player.gameObject_parent.isVisible = false;
+  // Set player game object
+  var boxChild = BABYLON.Mesh.CreateBox('playerChild',
+    1.0, scene);
+  boxChild.position.y = .5;
+  main.player.gameObject_child = boxChild;
+  // Check collisions on child
+  boxChild.checkCollisions = true;
+  // Parent boxChild to boxParent
+  boxChild.parent = boxParent;
 
   // Set player ground
   main.player.groundedHeight
-    = box.scaling.y * .5;
+    = boxChild.scaling.y * .5;
 };
 
 // Make camera
@@ -141,7 +155,9 @@ main.makeCamera = function () {
   // Set camera
   main.camera = camera;
   // Dont move camera
-  main.camera.speed = 0;
+  camera.speed = 0;
+  // Set camera's parent to be player's parent
+  camera.parent = main.player.gameObject_parent;
 };
 
 // Main move player
@@ -171,14 +187,37 @@ main.movePlayer = function () {
   // Player
   var player = main.player;
   // Player game object
-  var playerGO = player.gameObject;
+  var playerParent = player.gameObject_parent;
+  var playerChild = player.gameObject_child;
   // Player speed
   var playerSpeed = player.speed;
+
   // Move player left, right, forward, and back
-  playerGO.position.x
-    += x * main.deltaTime * playerSpeed;
-  playerGO.position.z
-    += z * main.deltaTime * playerSpeed;
+  var netAddedXZ = {
+    x: 0,
+    z: 0
+  };
+
+  // If player net-left/right motion isn't 0
+  if (x !== 0) {
+    // Add relative to rotation
+    var relativeLR
+      = main.relativeRight(playerParent.rotation.y);
+    netAddedXZ.x += x * relativeLR.x;
+    netAddedXZ.z += x * relativeLR.z;
+  }
+  // If player net-forward/back motion isn't 0
+  if (z !== 0) {
+    // Add relative to rotation
+    var relativeFB
+      = main.relativeForward(playerParent.rotation.y);
+    netAddedXZ.x += z * relativeFB.x;
+    netAddedXZ.z += z * relativeFB.z;
+  }
+  playerParent.position.x
+    += netAddedXZ.x * main.deltaTime * playerSpeed;
+  playerParent.position.z
+    += netAddedXZ.z * main.deltaTime * playerSpeed;
 
   // Jump input
   // If player has reached top of jump
@@ -191,7 +230,7 @@ main.movePlayer = function () {
     player.jumpTime = 0;
     // Set jump initial height
     player.jumpHeight_Start
-      = playerGO.position.y;
+      = playerParent.position.y;
     // Decrement jump count
     --player.jumpCount;
   }
@@ -213,9 +252,42 @@ main.movePlayer = function () {
       player.jumpCount = player.jumpCount_Start;
     }
     // Move player vertically
-    playerGO.position.y = y;
+    playerParent.position.y = y;
+  }
+
+  // Left right rotation
+  var y_r = 0;
+  // If Q
+  if (inputs[69]) {
+    y_r += 1;
+  }
+  // If E
+  if (inputs[81]) {
+    y_r -= 1;
+  }
+
+  // Rotate player
+  if (y_r !== 0) {
+    playerParent.rotation.y
+      += (y_r * main.deltaTime * player.rotationSpeed);
   }
 };
+
+// Main relative forward
+main.relativeForward = function (rad) {
+  return {
+    x: Math.sin(rad),
+    z: Math.cos(rad)
+  };
+}
+
+// Main relative right
+main.relativeRight = function (rad) {
+  return {
+    x: Math.cos(rad),
+    z: -Math.sin(rad)
+  };
+}
 
 // Main jump interpreter
 main.jumpInterpretter = function () {
