@@ -333,7 +333,7 @@ main.flipInterpretter = function () {
   // Time in jump
   var jumpTime = player.jumpTime;
   // Flip ratio
-  var flipRatio = .5 * jumpTime / player.maxJumpHeightTime;
+  var flipRatio = .75 * jumpTime / player.maxJumpHeightTime;
   // Return rotation
   return flipRatio;
 };
