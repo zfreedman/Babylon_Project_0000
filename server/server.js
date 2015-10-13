@@ -110,14 +110,12 @@ helper.joinRoom = function (data) {
  //           __/ | __/ |          
  //          |___/ |___/           
 
-var logger = {
+var logger = {};
 
-  // Log socket connection status
-  logConnection: function (socketID, bool) {
-    console.log('\tSOCKET', socketID, '| CONNECTED:', bool);
-  }
-
-};
+// Log socket connection status
+logger.logConnection = function (socketID, bool) {
+  console.log('SOCKET', socketID, '| CONNECTED:', bool);
+}
 
 //Listen to port 3000
 http.listen(3000, function () {

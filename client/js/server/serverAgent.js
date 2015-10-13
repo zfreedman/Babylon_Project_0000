@@ -25,9 +25,10 @@ var serverAgent = {};
 
 // Server agent initialize
 serverAgent.initialize = function () {
-
   // Socket on server verify
   socket.on('server:verify', function (data) {
+    // Add server agent username
+    serverAgent.username = data.username;
     // Request to join room
     socket.emit('client:joinRoom', {
       username: data.username,
@@ -41,6 +42,10 @@ serverAgent.initialize = function () {
     main.createScene();
     // Render room scene
     main.renderScene_start();
+    // Set player username
+    main.player.username = serverAgent.username;
+    // Set interval for updates
+    setInterval(serverAgent.localUpdate, 250);
   });
 };
 
@@ -52,6 +57,19 @@ serverAgent.verify = function () {
     'password': 'zach'
   });
 };
+
+// Server agent update
+serverAgent.localUpdate = function () {
+  // Emit local client update
+  socket.emit('client:localUpdate', main.getLocalUpdate());
+};
+
+//  _       _ _   _       _ _         
+// (_)     (_) | (_)     | (_)        
+//  _ _ __  _| |_ _  __ _| |_ _______ 
+// | | '_ \| | __| |/ _` | | |_  / _ \
+// | | | | | | |_| | (_| | | |/ /  __/
+// |_|_| |_|_|\__|_|\__,_|_|_/___\___|
 
 // Initialize serverAgent
 serverAgent.initialize();

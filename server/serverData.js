@@ -11,8 +11,22 @@
 // Server data master object
 var serverData = {};
 
-// Initialize rooms
-serverData.rooms = {};
+// Server data initialize
+serverData.initialize = function () {
+  // Initialize rooms
+  serverData.rooms = {};
+  // Set roomNames
+  this.roomNames = [
+    'Alpha', 'Beta', 'Delta', 'Omega'
+  ];
+  // Add one room
+  this.addRoom();
+};
+
+//  _ __ ___   ___  _ __ ___  ___ 
+// | '__/ _ \ / _ \| '_ ` _ \/ __|
+// | | | (_) | (_) | | | | | \__ \
+// |_|  \___/ \___/|_| |_| |_|___/
 
 // Server data add room
 serverData.addRoom = function () {
@@ -42,15 +56,12 @@ serverData.addPlayerToRoom = function (data) {
   return {roomJoined: true};
 };
 
-// Server data initialize
-serverData.initialize = function () {
-  // Set roomNames
-  this.roomNames = [
-    'Alpha', 'Beta', 'Delta', 'Omega'
-  ];
-  // Add one room
-  this.addRoom();
-};
+//  _       _ _   _       _ _         
+// (_)     (_) | (_)     | (_)        
+//  _ _ __  _| |_ _  __ _| |_ _______ 
+// | | '_ \| | __| |/ _` | | |_  / _ \
+// | | | | | | |_| | (_| | | |/ /  __/
+// |_|_| |_|_|\__|_|\__,_|_|_/___\___|
 
 // Initialize server data
 serverData.initialize();

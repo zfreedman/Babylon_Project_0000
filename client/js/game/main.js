@@ -338,6 +338,33 @@ main.flipInterpretter = function () {
   return flipRatio;
 };
 
+// Main get local update
+main.getLocalUpdate = function () {
+  // Get reference to player child game object
+  var player = main.player.gameObject_child;
+  // Get required attributes
+  return {
+    // Username
+    username: main.player.username,
+    // Game object attributes
+    position: {
+      x: player.position.x,
+      y: player.position.y,
+      z: player.position.z
+    },
+    rotation: {
+      x: player.rotation.x,
+      y: player.rotation.y,
+      z: player.rotation.z
+    },
+    scaling: {
+      x: player.scaling.x,
+      y: player.scaling.y,
+      z: player.scaling.z
+    }
+  };
+};
+
 // On window resize
 window.addEventListener('resize', function () {
   engine.resize();
