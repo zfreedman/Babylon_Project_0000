@@ -113,6 +113,9 @@ helper.joinRoom = function (data) {
   var result = serverData.addPlayerToRoom(data);
   // If player successfully added
   if (result.roomJoined) {
+    // Add player to room
+    io.sockets.connected[data.socketID]
+      .join(result.roomName);
     // Emit to player room joined
     io.sockets.connected[data.socketID]
       .emit('server:joinRoom', result);
@@ -126,12 +129,14 @@ helper.localUpdate = function (data) {
 };
 
 // Helper server update
-helper.serverUpdate = function () {
+helper.serverGameUpdate = function () {
   // Get all rooms
   var rooms = serverData.rooms;
   // Iterate over each room
   for (var room in rooms) {
-    console.log(rooms[room]);
+    // Emit to all sockets in the room
+    io.to(room).emit('server:gameUpdate',
+      rooms[room]);
   }
 };
 
@@ -144,7 +149,7 @@ helper.serverUpdate = function () {
 //       | |                        
 //       |_|                        
 
-setInterval(helper.serverUpdate, 1000);
+setInterval(helper.serverGameUpdate, 250);
 
  //  _                             
  // | |                            

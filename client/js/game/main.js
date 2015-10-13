@@ -30,6 +30,9 @@ main.createScene = function () {
   // Make player
   main.makePlayer();
 
+  // Initialize foreign players
+  main.foreignPlayers = {};
+
   // Make camera
   main.makeCamera();
 
@@ -93,6 +96,30 @@ main.makeEnvironment = function () {
   main.gravity = -10;
 };
 
+// Make camera
+main.makeCamera = function () {
+  // Create camera
+  var camera = new BABYLON.FreeCamera('camera0',
+    new BABYLON.Vector3(0, 3, -7), main.scene);
+  // Set camera target
+  camera.setTarget(BABYLON.Vector3.Zero());
+  // Add camera to canvas
+  camera.attachControl(canvas, false);
+  // Set camera
+  main.camera = camera;
+  // Dont move camera
+  camera.speed = 0;
+  // Set camera's parent to be player's parent
+  camera.parent = main.player.gameObject_parent;
+};
+
+//  _                 _        _ _            _   
+// | |               | |      | (_)          | |  
+// | | ___   ___ __ _| |   ___| |_  ___ _ __ | |_ 
+// | |/ _ \ / __/ _` | |  / __| | |/ _ \ '_ \| __|
+// | | (_) | (_| (_| | | | (__| | |  __/ | | | |_ 
+// |_|\___/ \___\__,_|_|  \___|_|_|\___|_| |_|\__|
+
 // Main make player
 main.makePlayer = function () {
   // Make player object
@@ -143,23 +170,6 @@ main.makePlayer = function () {
   // Set player ground
   main.player.groundedHeight
     = boxChild.scaling.y * .5;
-};
-
-// Make camera
-main.makeCamera = function () {
-  // Create camera
-  var camera = new BABYLON.FreeCamera('camera0',
-    new BABYLON.Vector3(0, 3, -7), main.scene);
-  // Set camera target
-  camera.setTarget(BABYLON.Vector3.Zero());
-  // Add camera to canvas
-  camera.attachControl(canvas, false);
-  // Set camera
-  main.camera = camera;
-  // Dont move camera
-  camera.speed = 0;
-  // Set camera's parent to be player's parent
-  camera.parent = main.player.gameObject_parent;
 };
 
 // Main move player
@@ -290,6 +300,58 @@ main.movePlayer = function () {
     }
     playerChild.rotation.x = flipRatio * 2 * Math.PI;
   }
+};
+
+//   __               _                    _ _            _   
+//  / _|             (_)                  | (_)          | |  
+// | |_ ___  _ __ ___ _  __ _ _ __     ___| |_  ___ _ __ | |_ 
+// |  _/ _ \| '__/ _ \ |/ _` | '_ \   / __| | |/ _ \ '_ \| __|
+// | || (_) | | |  __/ | (_| | | | | | (__| | |  __/ | | | |_ 
+// |_| \___/|_|  \___|_|\__, |_| |_|  \___|_|_|\___|_| |_|\__|
+//                       __/ |                                
+//                      |___/                                 
+
+// Main make foreign players
+main.makeForeignPlayers = function (data) {
+  // Iterate over all players
+  for (var username in data) {
+    // If the username isn't a current foreign player
+    if (this.foreignPlayers[username] === undefined) {
+      // Add object and attributes
+      this.foreignPlayers[username] = {
+        position: data.position,
+        rotation: data.rotation,
+        scaling: data.scaling
+      };
+      // Make the player gameObject
+      this.foreignPlayers[username].gameObject
+        = BABYLON.Mesh.CreateBox(username, 1.0, main.scene);
+    }
+  }
+};
+
+// Main move foreign players
+main.moveForeignPlayers = function (data) {
+  // Iterate over all players
+  var foreignPlayers = this.foreignPlayers;
+  for (var username in foreignPlayers) {
+    // Get reference
+    var player = foreignPlayers[username];
+    // Set position
+    player.gameObject.position
+      = this.makeVector3(data[username].position);
+    // Set rotation
+    player.gameObject.rotation
+      = this.makeVector3(data[username].rotation);
+    // Set scaling
+    player.gameObject.scaling
+      = this.makeVector3(data[username].scaling);
+  }
+};
+
+// Main make BABYLON.Vector3
+main.makeVector3 = function (data) {
+  return new BABYLON.Vector3(data.x, data.y, data.z);
 };
 
 // Main relative forward

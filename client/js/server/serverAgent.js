@@ -47,6 +47,12 @@ serverAgent.initialize = function () {
     // Set interval for updates
     setInterval(serverAgent.localUpdate, 250);
   });
+
+  // Socket on server game update
+  socket.on('server:gameUpdate', function (data) {
+    // Handoff to server agent
+    serverAgent.gameUpdate(data);
+  });
 };
 
 // Server agent verify
@@ -62,6 +68,14 @@ serverAgent.verify = function () {
 serverAgent.localUpdate = function () {
   // Emit local client update
   socket.emit('client:localUpdate', main.getLocalUpdate());
+};
+
+// Server agent update
+serverAgent.gameUpdate = function (data) {
+  // Add new foreign players
+  main.makeForeignPlayers(data);
+  // Move foreign players
+  main.moveForeignPlayers(data);
 };
 
 //  _       _ _   _       _ _         
