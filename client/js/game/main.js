@@ -103,7 +103,7 @@ main.makePlayer = function () {
   // Set player jumpTime
   player.jumpTime = -1;
   // Set player jumpVelocity_Start
-  player.jumpVelocity_Start = 5;
+  player.jumpVelocity_Start = 6;
   // Set player jumpHeight_Start
   player.jumpHeight_Start = -1;
   // Set player jump count

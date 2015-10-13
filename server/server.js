@@ -1,20 +1,21 @@
 // Note: comments done with
 // http://patorjk.com/software/taag/#p=display&f=Doom&t=Logger
 
-// ______                 _              _ 
-// | ___ \               (_)            | |
-// | |_/ /___  __ _ _   _ _ _ __ ___  __| |
-// |    // _ \/ _` | | | | | '__/ _ \/ _` |
-// | |\ \  __/ (_| | |_| | | | |  __/ (_| |
-// \_| \_\___|\__, |\__,_|_|_|  \___|\__,_|
-//               | |                       
-//               |_|                           
+//                       _              _ 
+//                      (_)            | |
+//  _ __ ___  __ _ _   _ _ _ __ ___  __| |
+// | '__/ _ \/ _` | | | | | '__/ _ \/ _` |
+// | | |  __/ (_| | |_| | | | |  __/ (_| |
+// |_|  \___|\__, |\__,_|_|_|  \___|\__,_|
+//              | |                       
+//              |_|                         
 
 // Requirements
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var serverData = require('./serverData');
 
 // Serve static files
 app.use(express.static(__dirname + '/../client'));
@@ -46,6 +47,14 @@ io.on('connection', function (socket) {
     // Handoff to helper
     helper.verify(data);
   });
+
+  // On player room join
+  socket.on('client:joinRoom', function (data) {
+    // Add socketID
+    data.socketID = socket.id;
+    // Handoff to helper
+    helper.joinRoom(data);
+  });
 });
 
 //  _          _                 
@@ -62,7 +71,6 @@ var helper = {};
 
 // Helper verify
 helper.verify = function (data) {
-
   // Get result
   var result = {
     'verified': true,
@@ -73,6 +81,24 @@ helper.verify = function (data) {
   // Emit mock object
   io.sockets.connected[data.socketID]
     .emit('server:verify', result);
+};
+
+// Helper join room
+helper.joinRoom = function (data) {
+
+  // Add available room
+  var tmpRoom = Object.keys(serverData.rooms)[0];
+  data.roomName = tmpRoom;
+  // Get result
+  var result = serverData.addPlayerToRoom(data);
+  // If player successfully added
+  if (result.roomJoined) {
+    // Emit to player room joined
+    io.sockets.connected[data.socketID]
+      .emit('server:joinRoom', {
+        roomJoined: result.roomJoined
+      });
+  }
 };
 
  //  _                             

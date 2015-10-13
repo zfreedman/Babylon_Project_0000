@@ -28,9 +28,18 @@ serverAgent.initialize = function () {
 
   // Socket on server verify
   socket.on('server:verify', function (data) {
-    // Create scene
+    // Request to join room
+    socket.emit('client:joinRoom', {
+      username: data.username,
+      playerData: {}
+    });
+  });
+
+  // Socket on server room join
+  socket.on('server:joinRoom', function (data) {
+    // Create room scene
     main.createScene();
-    // Render scene
+    // Render room scene
     main.renderScene_start();
   });
 };
