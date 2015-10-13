@@ -35,6 +35,9 @@ io.on('connection', function (socket) {
   // Log on server
   logger.logConnection(socket.id, true);
 
+  // Handoff to helper
+  helper.initializeSocket({socketID: socket.id});
+
   // On disconnect
   socket.on('disconnect', function () {
     logger.logConnection(socket.id, false);
@@ -55,6 +58,14 @@ io.on('connection', function (socket) {
     // Handoff to helper
     helper.joinRoom(data);
   });
+
+  // On local client update
+  socket.on('client:localUpdate', function (data) {
+    // Add socketID
+    data.socketID = socket.id;
+    // Handoff to helper
+    helper.localUpdate(data);
+  });
 });
 
 //  _          _                 
@@ -69,6 +80,11 @@ io.on('connection', function (socket) {
 // Helper master object
 var helper = {};
 
+// Helper initialize socket
+helper.initializeSocket = function (data) {
+  serverData.initializeSocketInfo(data);
+};
+
 // Helper verify
 helper.verify = function (data) {
   // Get result
@@ -77,7 +93,11 @@ helper.verify = function (data) {
     'username': 'zach',
     'password': 'zach'
   };
-
+  // Update socket info
+  serverData.updateSocketInfo({
+    socketID: data.socketID,
+    username: result.username
+  });
   // Emit mock object
   io.sockets.connected[data.socketID]
     .emit('server:verify', result);
@@ -85,21 +105,46 @@ helper.verify = function (data) {
 
 // Helper join room
 helper.joinRoom = function (data) {
-
   // Add available room
   var tmpRoom = Object.keys(serverData.rooms)[0];
   data.roomName = tmpRoom;
+
   // Get result
   var result = serverData.addPlayerToRoom(data);
   // If player successfully added
   if (result.roomJoined) {
     // Emit to player room joined
     io.sockets.connected[data.socketID]
-      .emit('server:joinRoom', {
-        roomJoined: result.roomJoined
-      });
+      .emit('server:joinRoom', result);
   }
 };
+
+// Helper local client update
+helper.localUpdate = function (data) {
+  // Update player in room
+  serverData.updatePlayerInRoom(data);
+};
+
+// Helper server update
+helper.serverUpdate = function () {
+  // Get all rooms
+  var rooms = serverData.rooms;
+  // Iterate over each room
+  for (var room in rooms) {
+    console.log(rooms[room]);
+  }
+};
+
+//                  _       _       
+//                 | |     | |      
+//  _   _ _ __   __| | __ _| |_ ___ 
+// | | | | '_ \ / _` |/ _` | __/ _ \
+// | |_| | |_) | (_| | (_| | ||  __/
+//  \__,_| .__/ \__,_|\__,_|\__\___|
+//       | |                        
+//       |_|                        
+
+setInterval(helper.serverUpdate, 1000);
 
  //  _                             
  // | |                            
@@ -115,7 +160,7 @@ var logger = {};
 // Log socket connection status
 logger.logConnection = function (socketID, bool) {
   console.log('SOCKET', socketID, '| CONNECTED:', bool);
-}
+};
 
 //Listen to port 3000
 http.listen(3000, function () {

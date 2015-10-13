@@ -42,18 +42,72 @@ serverData.addRoom = function () {
 
 // Server data add player to room
 serverData.addPlayerToRoom = function (data) {
+  // Set player room
+  this.updateSocketInfo({
+    socketID: data.socketID,
+    roomName: data.roomName
+  });
+  // Update player in room
+  this.updatePlayerInRoom(data);
+  // Return success
+  return {
+    roomJoined: true,
+    roomName: data.roomName
+  };
+};
+
+// Server data update player in room
+serverData.updatePlayerInRoom = function (data) {
   // Get username
   var username = data.username;
   // Get playerData
   var playerData = data.playerData;
   // Get roomName
-  var roomName = data.roomName;
+  var roomName = this.sockets[data.socketID].roomName;
   // Get rooms
   var rooms = this.rooms;
   // Set key value pair in room
   rooms[roomName][username] = playerData;
-  // Return success
-  return {roomJoined: true};
+};
+
+//  _   _ ___  ___ _ __ ___ 
+// | | | / __|/ _ \ '__/ __|
+// | |_| \__ \  __/ |  \__ \
+//  \__,_|___/\___|_|  |___/
+       
+// Master object for all connected sockets
+serverData.sockets = {};
+
+// Server data initialize socket info
+serverData.initializeSocketInfo = function (data) {
+  // Get socketID
+  var socketID = data.socketID;
+  // Initialize to empty object
+  this.sockets[socketID] = {};
+  var tmpSocket = this.sockets[socketID];
+  // Set username
+  tmpSocket.username = null;
+  // Set roomName
+  tmpSocket.roomName = null;
+
+};
+// Server data update socket info
+serverData.updateSocketInfo = function (data) {
+  // Get socketID
+  var socketID = data.socketID;
+  // Get username
+  var username = data.username || null;
+  // If username, set username
+  if (this.sockets[socketID]) {
+    this.sockets[socketID].username = username;
+  }
+  // Get roomName
+  var roomName = data.roomName || null;
+  // If username, set username
+  if (this.sockets[socketID]) {
+    this.sockets[socketID].roomName = roomName;
+  }
+  console.log(this.sockets[socketID]);
 };
 
 //  _       _ _   _       _ _         

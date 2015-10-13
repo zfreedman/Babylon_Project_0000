@@ -340,27 +340,30 @@ main.flipInterpretter = function () {
 
 // Main get local update
 main.getLocalUpdate = function () {
-  // Get reference to player child game object
-  var player = main.player.gameObject_child;
+  // Get reference to player game objects
+  var playerParent = main.player.gameObject_parent;
+  var playerChild = main.player.gameObject_child;
   // Get required attributes
   return {
     // Username
     username: main.player.username,
     // Game object attributes
-    position: {
-      x: player.position.x,
-      y: player.position.y,
-      z: player.position.z
-    },
-    rotation: {
-      x: player.rotation.x,
-      y: player.rotation.y,
-      z: player.rotation.z
-    },
-    scaling: {
-      x: player.scaling.x,
-      y: player.scaling.y,
-      z: player.scaling.z
+    playerData: {
+      position: {
+        x: playerParent.position.x,
+        y: playerParent.position.y,
+        z: playerParent.position.z
+      },
+      rotation: {
+        x: playerChild.rotation.x,
+        y: playerParent.rotation.y,
+        z: playerParent.rotation.z
+      },
+      scaling: {
+        x: playerParent.scaling.x,
+        y: playerParent.scaling.y,
+        z: playerParent.scaling.z
+      }
     }
   };
 };
