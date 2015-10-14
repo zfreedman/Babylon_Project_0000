@@ -21,23 +21,26 @@ var main = {};
 main.createScene = function () {
 
   // Create scene object
-  main.scene = new BABYLON.Scene(engine);
-  var scene = main.scene;
+  this.scene = new BABYLON.Scene(engine);
+  var scene = this.scene;
 
   // Set main serverInfo
-  main.serverInfo = {};
-  
+  this.serverInfo = {};
+
   // Make environment
-  main.makeEnvironment();
+  this.makeEnvironment();
 
   // Make player
-  main.makePlayer();
+  this.makePlayer();
 
   // Initialize foreign players
-  main.foreignPlayers = {};
-
+  this.foreignData = {};
+  // The foreign player player data
+  this.foreignData.players = {};
+  // The current animation time of foreign player movement
+  this.foreignData.gradientTime = 0;
   // Make camera
-  main.makeCamera();
+  this.makeCamera();
 
   // // Return the scene
   return scene;
@@ -53,6 +56,8 @@ main.renderScene_start = function () {
     main.updateTime();
     // Move player
     main.movePlayer();
+    // Move foreign players
+    main.moveForeignPlayers();
     // Render scene
     main.scene.render();
   });
@@ -359,44 +364,72 @@ main.resetPlayerVelocities = function () {
 
 // Main make foreign players
 main.makeForeignPlayers = function (data) {
-  console.log(data);
   // Delete data about us
   delete data[main.player.username];
+  // Get foreign players
+  var foreignPlayers = this.foreignData.players;
   // Iterate over all players
   for (var username in data) {
     // If the username isn't a current foreign player
-    if (this.foreignPlayers[username] === undefined) {
+    if (foreignPlayers[username] === undefined) {
       // Add object and attributes
-      this.foreignPlayers[username] = {
+      foreignPlayers[username] = {
         position: data.position,
         rotation: data.rotation,
         scaling: data.scaling,
         velocities: data.velocities
       };
       // Make the player gameObject
-      this.foreignPlayers[username].gameObject
+      foreignPlayers[username].gameObject
         = BABYLON.Mesh.CreateBox(username, 1.0, main.scene);
     }
   }
+  // Reset the current foreignPlayers animation percentage
+  this.foreignData.gradientTime = 0;
 };
 
 // Main move foreign players
-main.moveForeignPlayers = function (data) {
+main.moveForeignPlayers = function () {
+  // Get animation gradient
+  var gradientTime = this.foreignData.gradientTime;
+  var updateRate = this.serverInfo.updateRate;
+  var gradient = gradientTime / updateRate;
+
   // Iterate over all players
-  var foreignPlayers = this.foreignPlayers;
+  var foreignPlayers = this.foreignData.players;
   for (var username in foreignPlayers) {
     // Get reference
     var player = foreignPlayers[username];
-    // Set position
-    player.gameObject.position
-      = this.makeVector3(data[username].position);
+    // Get velocities
+    var velocities = player.velocities;
+    // Interpolate position
+    var newPosition
+      = BABYLON.Animation.prototype.vector3InterpolateFunction(
+          player.gameObject.position,
+          this.makeVector3(data[username].position),
+          gradient
+        );
+    player.gameObject.position = newPosition;
     // Set rotation
-    player.gameObject.rotation
-      = this.makeVector3(data[username].rotation);
+    var newRotation
+      = BABYLON.Animation.prototype.vector3InterpolateFunction(
+          player.gameObject.rotation,
+          this.makeVector3(data[username].rotation),
+          gradient
+        );
+    player.gameObject.rotation = newRotation;
     // Set scaling
-    player.gameObject.scaling
-      = this.makeVector3(data[username].scaling);
+    var newScaling
+      = BABYLON.Animation.prototype.vector3InterpolateFunction(
+          player.gameObject.scaling,
+          this.makeVector3(data[username].scaling),
+          gradient
+        );
+    player.gameObject.scaling = newScaling;
   }
+
+  // Update gradient by delta time
+  this.foreignData.gradient += main.deltaTime;
 };
 
 // Main make BABYLON.Vector3
@@ -476,7 +509,7 @@ main.getLocalUpdate = function () {
         y: playerParent.scaling.y,
         z: playerParent.scaling.z
       },
-      velocities: main.player.currentVelocities
+      velocities: 2
     }
   };
 };
