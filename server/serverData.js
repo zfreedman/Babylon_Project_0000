@@ -47,7 +47,6 @@ serverData.addPlayerToRoom = function (data) {
     socketID: data.socketID,
     roomName: data.roomName
   });
-  console.log('setting room data');
   // Update player in room
   this.updatePlayerInRoom(data);
   // Return success
