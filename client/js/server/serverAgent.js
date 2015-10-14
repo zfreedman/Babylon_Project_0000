@@ -59,8 +59,8 @@ serverAgent.initialize = function () {
 serverAgent.verify = function () {
   // Attempt to verify client
   socket.emit('client:verify', {
-    'username': 'zach',
-    'password': 'zach'
+    'username': /*'zach'*/'' + Math.round(Math.random() * 1000),
+    'password': 'two'
   });
 };
 

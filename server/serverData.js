@@ -47,6 +47,7 @@ serverData.addPlayerToRoom = function (data) {
     socketID: data.socketID,
     roomName: data.roomName
   });
+  console.log('setting room data');
   // Update player in room
   this.updatePlayerInRoom(data);
   // Return success
@@ -98,16 +99,15 @@ serverData.updateSocketInfo = function (data) {
   // Get username
   var username = data.username || null;
   // If username, set username
-  if (this.sockets[socketID]) {
+  if (username) {
     this.sockets[socketID].username = username;
   }
   // Get roomName
   var roomName = data.roomName || null;
   // If username, set username
-  if (this.sockets[socketID]) {
+  if (roomName) {
     this.sockets[socketID].roomName = roomName;
   }
-  console.log(this.sockets[socketID]);
 };
 
 //  _       _ _   _       _ _         

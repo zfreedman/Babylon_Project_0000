@@ -90,8 +90,8 @@ helper.verify = function (data) {
   // Get result
   var result = {
     'verified': true,
-    'username': 'zach',
-    'password': 'zach'
+    'username': data.username,
+    'password': data.password
   };
   // Update socket info
   serverData.updateSocketInfo({

@@ -148,6 +148,9 @@ main.makePlayer = function () {
   // Set player LR rotation speed
   player.rotationSpeed = 2;
 
+  // Set player velocites
+  player.currentVelocities = {};
+
   // Get scene reference
   var scene = main.scene;
 
@@ -174,6 +177,9 @@ main.makePlayer = function () {
 
 // Main move player
 main.movePlayer = function () {
+  // Reset player velocities
+  this.resetPlayerVelocities();
+
   // Left and right input
   var x = 0;
   // If left key
@@ -226,10 +232,15 @@ main.movePlayer = function () {
     netAddedXZ.x += z * relativeFB.x;
     netAddedXZ.z += z * relativeFB.z;
   }
+  // Update player positions
   playerParent.position.x
     += netAddedXZ.x * main.deltaTime * playerSpeed;
   playerParent.position.z
     += netAddedXZ.z * main.deltaTime * playerSpeed;
+
+  // Set current player x and z velocites for server update
+  player.currentVelocities.x = netAddedXZ.x * playerSpeed;
+  player.currentVelocities.z = netAddedXZ.z * playerSpeed;
 
   // Jump input
   // If player has reached top of jump
@@ -250,6 +261,8 @@ main.movePlayer = function () {
   if (player.jumpTime !== -1) {
     // Increase time in jump
     player.jumpTime += main.deltaTime;
+    // Get reference to old player position
+    var oldPlayerHeight = playerParent.position.y;
     // Get current jump position
     var y = main.jumpInterpretter();
     // If player has finished first half of jump
@@ -266,6 +279,10 @@ main.movePlayer = function () {
     }
     // Move player vertically
     playerParent.position.y = y;
+
+    // Set y velocity
+    player.currentVelocities.y
+      = (y - oldPlayerHeight) / main.deltaTime;
   }
 
   // Left right rotation
@@ -285,10 +302,15 @@ main.movePlayer = function () {
       += (y_r * main.deltaTime * player.rotationSpeed);
   }
 
+  // Set player y rotation
+  player.currentVelocities.y_r = y_r * player.rotationSpeed;
+
   // Flip player
   var x_r = 0;
   // If used both jumps
   if (!player.flipComplete && player.jumpCount === 0) {
+    // Get current x rotation
+    var oldPlayerXRotation = playerChild.rotation.x;
     // Get flip ratio
     var flipRatio = main.flipInterpretter();
     // If ratio exceeds 1
@@ -298,8 +320,29 @@ main.movePlayer = function () {
       // Complete flip
       player.flipComplete = true;
     }
+    // Set new rotation
     playerChild.rotation.x = flipRatio * 2 * Math.PI;
+
+    // Set x rotational velocity
+    player.currentVelocities.x_r
+      = (playerChild.rotation.x -
+          oldPlayerXRotation) / main.deltaTime;
   }
+};
+
+// Main clear local player velocity
+main.resetPlayerVelocities = function () {
+  // Get reference to local player
+  var player = main.player;
+  // Reset all velocities to 0
+
+  // Positional velocity
+  player.currentVelocities.x = 0;
+  player.currentVelocities.y = 0;
+  player.currentVelocities.z = 0;
+  // Rotational velocity
+  player.currentVelocities.x_r = 0;
+  player.currentVelocities.y_r = 0;
 };
 
 //   __               _                    _ _            _   
@@ -313,6 +356,9 @@ main.movePlayer = function () {
 
 // Main make foreign players
 main.makeForeignPlayers = function (data) {
+  console.log(data);
+  // Delete data about us
+  delete data[main.player.username];
   // Iterate over all players
   for (var username in data) {
     // If the username isn't a current foreign player
@@ -425,7 +471,8 @@ main.getLocalUpdate = function () {
         x: playerParent.scaling.x,
         y: playerParent.scaling.y,
         z: playerParent.scaling.z
-      }
+      },
+      velocities: main.player.currentVelocities
     }
   };
 };
