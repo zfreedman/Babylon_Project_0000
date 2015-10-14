@@ -17,6 +17,17 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var serverData = require('./serverData');
 
+//  _        __      
+// (_)      / _|     
+//  _ _ __ | |_ ___  
+// | | '_ \|  _/ _ \ 
+// | | | | | || (_) |
+// |_|_| |_|_| \___/ 
+
+// Info master object
+var info = {};
+info.updateRate = 250;
+
 // Serve static files
 app.use(express.static(__dirname + '/../client'));
 // Path to serve static files
@@ -116,6 +127,8 @@ helper.joinRoom = function (data) {
     // Add player to room
     io.sockets.connected[data.socketID]
       .join(result.roomName);
+    // Add update rate to result
+    result.updateRate = 250;
     // Emit to player room joined
     io.sockets.connected[data.socketID]
       .emit('server:joinRoom', result);
@@ -149,7 +162,7 @@ helper.serverGameUpdate = function () {
 //       | |                        
 //       |_|                        
 
-setInterval(helper.serverGameUpdate, 250);
+setInterval(helper.serverGameUpdate, info.updateRate);
 
  //  _                             
  // | |                            
