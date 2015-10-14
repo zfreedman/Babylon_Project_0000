@@ -24,6 +24,9 @@ main.createScene = function () {
   main.scene = new BABYLON.Scene(engine);
   var scene = main.scene;
 
+  // Set main serverInfo
+  main.serverInfo = {};
+  
   // Make environment
   main.makeEnvironment();
 
@@ -367,7 +370,8 @@ main.makeForeignPlayers = function (data) {
       this.foreignPlayers[username] = {
         position: data.position,
         rotation: data.rotation,
-        scaling: data.scaling
+        scaling: data.scaling,
+        velocities: data.velocities
       };
       // Make the player gameObject
       this.foreignPlayers[username].gameObject

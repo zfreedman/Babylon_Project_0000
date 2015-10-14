@@ -46,6 +46,8 @@ serverAgent.initialize = function () {
     main.player.username = serverAgent.username;
     // Set interval for updates
     setInterval(serverAgent.localUpdate, data.updateRate);
+    // Set game update rate
+    main.serverInfo.updateRate = data.updateRate;
   });
 
   // Socket on server game update
