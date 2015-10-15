@@ -26,7 +26,7 @@ var serverData = require('./serverData');
 
 // Info master object
 var info = {};
-info.updateRate = 250;
+info.updateRate = 50;
 
 // Serve static files
 app.use(express.static(__dirname + '/../client'));
@@ -128,7 +128,7 @@ helper.joinRoom = function (data) {
     io.sockets.connected[data.socketID]
       .join(result.roomName);
     // Add update rate to result
-    result.updateRate = 250;
+    result.updateRate = info.updateRate;
     // Emit to player room joined
     io.sockets.connected[data.socketID]
       .emit('server:joinRoom', result);
@@ -150,6 +150,7 @@ helper.serverGameUpdate = function () {
     // Emit to all sockets in the room
     io.to(room).emit('server:gameUpdate',
       rooms[room]);
+    console.log(rooms[room]);
   }
 };
 

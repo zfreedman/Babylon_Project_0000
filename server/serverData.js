@@ -47,8 +47,6 @@ serverData.addPlayerToRoom = function (data) {
     socketID: data.socketID,
     roomName: data.roomName
   });
-  // Update player in room
-  this.updatePlayerInRoom(data);
   // Return success
   return {
     roomJoined: true,
@@ -67,6 +65,9 @@ serverData.updatePlayerInRoom = function (data) {
   // Get rooms
   var rooms = this.rooms;
   // Set key value pair in room
+  if (Object.keys(playerData).length === 0) {
+    console.log('no data');
+  }
   rooms[roomName][username] = playerData;
 };
 

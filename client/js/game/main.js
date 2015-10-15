@@ -57,7 +57,7 @@ main.renderScene_start = function () {
     // Move player
     main.movePlayer();
     // Move foreign players
-    // main.moveForeignPlayers();
+    main.moveForeignPlayers();
     // Render scene
     main.scene.render();
   });
@@ -380,11 +380,8 @@ main.makeForeignPlayers = function (data) {
       foreignPlayers[username].gameObject
         = BABYLON.Mesh.CreateBox(username, 1.0, main.scene);
     }
-    console.log(Object.keys(data));
-    console.log(data[username]);
     // Reference to player data
     var playerData = data[username];
-    console.log(playerData);
     // Add object and attributes
     foreignPlayers[username].onUpdate = {
       position: main.makeVector3(playerData.position),
@@ -402,15 +399,15 @@ main.makeForeignPlayers = function (data) {
         // Current position plus expected position added
         x: onUpdate.position.x
           + (onUpdate.velocities.x
-              * main.serverInfo.updateRate),
+              * main.serverInfo.updateRate/1000),
         // Current position plus expected position
         y: onUpdate.position.y
           + (onUpdate.velocities.y
-              * main.serverInfo.updateRate),
+              * main.serverInfo.updateRate/1000),
         // Current position plus expected position
         z: onUpdate.position.z
           + (onUpdate.velocities.z
-              * main.serverInfo.updateRate)
+              * main.serverInfo.updateRate/1000)
       }),
 
       // Rotation
@@ -418,11 +415,11 @@ main.makeForeignPlayers = function (data) {
         // Current rotation plus expected rotation added
         x: onUpdate.rotation.x
           + (onUpdate.velocities.x_r
-              * main.serverInfo.updateRate),
+              * main.serverInfo.updateRate/1000),
         // Current rotation plus expected rotation added
         y: onUpdate.rotation.y
           + (onUpdate.velocities.y_r
-              * main.serverInfo.updateRate),
+              * main.serverInfo.updateRate/1000),
         // Current rotation plus expected rotation added
         z: onUpdate.rotation.z
       })
@@ -438,7 +435,7 @@ main.makeForeignPlayers = function (data) {
 main.moveForeignPlayers = function () {
   // Get animation gradient
   var gradient = this.getAnimationGradient();
-
+  
   // Iterate over all players
   var foreignPlayers = this.foreignData.players;
   for (var username in foreignPlayers) {
@@ -465,18 +462,20 @@ main.moveForeignPlayers = function () {
           gradient
         );
     player.gameObject.rotation = newRotation;
+    console.log(newPosition);
     // Set scaling
-    var newScaling
+    /*var newScaling
       = BABYLON.Animation.prototype.vector3InterpolateFunction(
           onUpdate.scaling,
           predictions.scaling,
           gradient
         );
-    player.gameObject.scaling = newScaling;
+    player.gameObject.scaling = newScaling;*/
   }
 
   // Update gradient by delta time
-  this.foreignData.gradient += main.deltaTime;
+  main.incrementAnimationGradient();
+
 };
 
 // Main calculate gradient time
@@ -485,6 +484,12 @@ main.getAnimationGradient  = function () {
   var gradientTime = this.foreignData.gradientTime;
   var updateRate = this.serverInfo.updateRate;
   return gradientTime / updateRate;
+};
+
+// Main increment animation gradient time
+main.incrementAnimationGradient = function () {
+  // Increment animation gradient
+  this.foreignData.gradientTime += (main.deltaTime * 1000);
 };
 
 // Main make BABYLON.Vector3
