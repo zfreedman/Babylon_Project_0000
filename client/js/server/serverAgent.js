@@ -76,6 +76,7 @@ serverAgent.localUpdate = function () {
 serverAgent.gameUpdate = function (data) {
   // Add new foreign players
   main.makeForeignPlayers(data);
+  console.log(data);
 };
 
 //  _       _ _   _       _ _         
